@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+#customers {
+	    	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+		    border-collapse: collapse;
+			width: 30%;
+			border: 3px solid black;
+}
+#customers td, #customers th {
+	    border: 1px solid #ddd;
+		text-align: center;
+		padding: 8px;
+}
+#customers tr:nth-child(even){background-color: #f2f2f2}
+#customers tr:hover {background-color: #ddd;}
+#customers th {
+	    padding-top: 12px;
+		    padding-bottom: 12px;
+			    background-color: #4CAF50;
+				    color: white;
+}
+</style>
+
+	</head>
+	<body>
+		<table id="customers">
+		{% for i in range(len(answers)) %}
+			{% if i%3 == 0 %} 
+				<tr style="border-top:3px solid black;">
+			{% else %}
+				<tr>
+			{% end %}
+				{% for j in range(len(answers[i])) %}
+					{% if j%3 == 0 %} 
+						<td style="border-left:3px solid black;">
+					{% else %}
+						<td>
+					{% end %}
+					{{ answers[i][j] }} </td>
+				{% end %}
+			</tr>
+		{% end %}
+		</table>
+	</body>
+	
+</html>
