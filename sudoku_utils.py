@@ -234,7 +234,6 @@ def print_data(data, datatype="new data"):
 
 def sudoku(array):
 	counter = 0
-	array = thisarray
 	data = copy.deepcopy(array)
 	ori = copy.deepcopy(array)
 	flag = True 
