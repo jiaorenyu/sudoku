@@ -17,28 +17,6 @@ class IndexHandler(tornado.web.RequestHandler):
 class SudokuHandler(tornado.web.RequestHandler):
 	@tornado.web.asynchronous
 	@tornado.gen.engine
-	def get(self):
-		sudoku_list = []
-		line = []
-		'''
-		for i in range(9):
-			line = []
-			for j in range(9):
-				param_name = str(i)+"_"+str(j)
-				value = self.get_argument(param_name)
-				if value == '':
-					value = 0
-				else:
-					value = int(value)
-				line.append(value)
-			sudoku_list.append(copy.deepcopy(line))
-		'''
-		answers = yield tornado.gen.Task(sudoku, sudoku_list)
-#answers = sudoku(sudoku_list)
-
-		self.render('smile.html', answers=answers)
-		self.finish()
-
 	def post(self):
 		sudoku_list = []
 		line = []

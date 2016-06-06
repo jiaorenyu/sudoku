@@ -28,6 +28,17 @@ array = [
 	[2,0,0, 0,0,6, 0,0,7]
 ]
 '''
+thisarray=[
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0]
+	]
 
 values=[
 	[0,0,0,0,0,0,0,0,0],
@@ -41,6 +52,16 @@ values=[
 	[0,0,0,0,0,0,0,0,0]
 	]
 
+
+debug = False 
+
+def print_debug(info, msgtype="normal"):
+	if debug:
+		if msgtype=="normal":
+			print(info)
+		else:
+			for line in info:
+				print(line)
 
 def cal_pvalues(data):
 	for i in range(len(data)):
@@ -121,20 +142,20 @@ def get_values(data,i,j):
 	
 	return pvalues
 
-def happen_counts_row(values, i, pv):
+def happen_counts_row(i, pv):
 	counter = 0
 	for x in range(9):
 		if values[i][x] != 0 and pv in values[i][x]:
 			counter += 1
 	return counter
-def happen_counts_col(values, j, pv):
+def happen_counts_col(j, pv):
 	counter = 0
 	for x in range(9):
 		if values[x][j] != 0 and pv in values[x][j]:
 			counter += 1
 	return counter
 
-def happen_counts_mat(values, i, j, pv):
+def happen_counts_mat(i, j, pv):
 	counter = 0
 	xi = i/3
 	yj = j/3
@@ -153,35 +174,34 @@ def reasoning(data_new, i, j):
 	if len(pvalues) == 1:
 		return pvalues[0]
 	for pv in pvalues:
-		counter = happen_counts_row(values, i, pv)
+		counter = happen_counts_row(i, pv)
 		if counter == 1:
 			return pv
 		
-		counter = happen_counts_col(values, j, pv)
+		counter = happen_counts_col( j, pv)
 		if counter == 1:
 			return pv
 	
-		counter = happen_counts_mat(values, i, j, pv)
+		counter = happen_counts_mat( i, j, pv)
 		if counter == 1:
 			return pv
 	return None
 
 def scan(data):
+	data_new = copy.deepcopy(data)
 	if not cal_pvalues(data):
 		return [False, data_new]
-	data_new = copy.deepcopy(data)
 	for i in range(9):
 		for j in range(9):
 			if data_new != 0:
 				continue
-			value = reasoning(data_new, i, j)
+			value = reasoning(data_new, i, j, thisvalues)
 			if value == None:
 				continue
 			if conflict(data_new, i, j, value):
 				return [False, data_new]
-			if not cal_pvalues(data_new):
+			if not cal_pvalues(data_new, thisvalues):
 				return [False, data_new]
-
 	return [True, data_new]
 
 
@@ -189,42 +209,42 @@ def scan(data):
 
 status_save = []
 
-def get_min(values):
-	[i,j] = [0,0]
-	min_len = 10
-	for x in range(len(values)):
-		for y in range(len(values[0])):
+def get_new():
+	
+	for x in range(9):
+		for y in range(9):
 			if values[x][y] != 0:
-				if len(values[x][y]) < min_len:
-					[i, j] = [x, y]
-					min_len = len(values[x][y])
-	
-	return [i, j]
+				return [x,y]	
 
-def guess(data, values, status_save):
-	[i,j] = get_min(values)   
-	
 
-	if len(values[i][j]) == 0:
-		return False
-
+def guess_new(data):
+	[i,j] = get_new()
 	pv = values[i][j].pop()
-	print("guess", i, j, pv)
-
-	if len(values[i][j]) == 0:
-		values[i][j] = 0
-	status_save.append([i, j, copy.deepcopy(data), copy.deepcopy(values)])
+	print_debug([i, j, pv])
+	if len(values[i][j]) != 0:
+		status_save.append([i, j, copy.deepcopy(data), copy.deepcopy(values)])
 	data[i][j] = pv
+	values[i][j] = 0
 	
-	return True
+	return [True, data]
 
-def recover(data, values, status_save):
+def guess_next(data):
 	if len(status_save) == 0:
-		return False
+		return [False, data]
+	[i, j, data, values] = status_save.pop()
+	print_debug("pop")
+	print_debug([i,j])
+	print_debug(data, "data")
+	print_debug(values, "data")
+	pv = values[i][j].pop()
+	print_debug([i, j, pv])
+	if len(values[i][j]) != 0:
+		status_save.append([i, j, copy.deepcopy(data), copy.deepcopy(values)])
+	data[i][j] = pv
+	values[i][j] = 0
 
-	[i,j, data, values] = status_save.pop()
-	
-	return True
+	return [True , data]
+
 
 def print_data(data, datatype="new data"):
 	print(datatype)
@@ -242,7 +262,9 @@ def sudoku(array):
 		flag=True
 		while(unfinish(data)):
 			counter += 1
+			print_debug(counter)
 			[stat, data_new] = scan(data)
+			print_debug(stat)
 			if not stat:
 				flag = False 
 				break
@@ -250,25 +272,30 @@ def sudoku(array):
 			data = copy.deepcopy(data_new)
 		if (unfinish(data)):
 			guess_counter += 1
+			print_debug(data, "data")
+			print_debug(values, "data")
 			if flag:
-				if not guess(data, values, status_save):
+				[status, data] = guess_new(data)
+				if not status:
 					return None
 			else:
-				if not recover(data, values, status_save):
+				[status, data] = guess_next(data)
+
+				if not status:
 					return None 
-				if not guess(data, values, status_save):
-					return None 
-		
-	print(time.time())
+					
+#cal_pvalues(data, thisvalues)
+			print_debug(data, "data")
+			print_debug(values, "data")
 	print("counter",counter)
-	print("guess_counter", guess_counter)
+	print("guess_counter", guess_counter) 
 	print_data(ori, "ori")
 	print_data(data, "new")   
 
 	return data
 
 if __name__=="__main__":
-	result=sudoku(array)
+	result=sudoku(thisarray)
 	if result != None:
 		print("OK")
 		print_data(result)
